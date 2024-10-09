@@ -62,5 +62,7 @@
     "comgate",
     "medusa-payment",
     "medusa-payment-comgate"
-  ]
+  ],
+  "types": "./dist/index.d.ts",
+  "homepage": "https://github.com/JozefCmiel/medusa-payment-comgate#readme"
 }
