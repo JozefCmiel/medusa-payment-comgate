@@ -1,5 +1,5 @@
 import ComgateClient from "comgate-node";
-import {EOL} from "os";
+import { EOL } from "os";
 
 import {
   AbstractPaymentProcessor,
@@ -14,14 +14,13 @@ import {
   ComgatePaymentOptions,
   ComgatePaymentProcessorSessionResponse,
   ComgateSessionData,
-  PaymentProviderKeys
+  PaymentProviderKeys,
 } from "../types";
 
-import { MedusaError } from "medusa-core-utils";
 import { StatusResponseStatus } from "comgate-node/dist/types/endpoints/status";
 
 abstract class ComgateBase extends AbstractPaymentProcessor {
-  static identifier = PaymentProviderKeys.COMGATE;
+  static identifier = PaymentProviderKeys.COMGATE_CARD;
 
   protected readonly options_: ComgatePaymentOptions;
   public comgateClient: ComgateClient;
@@ -43,47 +42,46 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
       new ComgateClient({
         merchant: this.options_.merchant,
         secret: this.options_.secret,
-        test: this.options_.test
+        test: this.options_.test,
       });
   }
 
-  async getPaymentStatus(paymentSessionData: ComgateSessionData
+  async getPaymentStatus(
+    paymentSessionData: ComgateSessionData
   ): Promise<PaymentSessionStatus> {
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "getPaymentStatus", "start")
+      console.log("ComgateMedusa: " + "getPaymentStatus", "start");
     }
 
     const transId = paymentSessionData.comgateData.transId as string;
 
     if (this.options_.debug) {
       console.log("ComgateMedusa: " + "getPaymentStatus", "data: ", {
-        transId: transId
-      })
+        transId: transId,
+      });
     }
 
     try {
       const transactionStatus = await this.getComgateTransactionStatus(transId);
       if (this.options_.debug) {
         console.log("ComgateMedusa: " + "getPaymentStatus", "response: ", {
-          transId: transactionStatus
-        })
+          transId: transactionStatus,
+        });
       }
-      return transactionStatus.status
+      return transactionStatus.status;
     } catch (error) {
       if (this.options_.debug) {
-        console.log("ComgateMedusa: " + "getPaymentStatus", "error: ", error)
+        console.log("ComgateMedusa: " + "getPaymentStatus", "error: ", error);
       }
       return PaymentSessionStatus.ERROR;
     }
-
   }
 
   async initiatePayment(
     context: PaymentProcessorContext
   ): Promise<PaymentProcessorError | ComgatePaymentProcessorSessionResponse> {
-
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "initiatePayment", "start")
+      console.log("ComgateMedusa: " + "initiatePayment", "start");
     }
 
     const session_data: ComgateSessionData = {
@@ -93,15 +91,19 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
         status: "INITIATED",
         redirect: null,
         error: null,
-      }
+      },
     };
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "initiatePayment", "session_data: ", session_data)
+      console.log(
+        "ComgateMedusa: " + "initiatePayment",
+        "session_data: ",
+        session_data
+      );
     }
 
     return {
-      session_data: session_data
+      session_data: session_data,
     };
   }
 
@@ -115,23 +117,25 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
         data: ComgatePaymentProcessorSessionResponse["session_data"];
       }
   > {
-
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "authorizePayment", "start")
+      console.log("ComgateMedusa: " + "authorizePayment", "start");
     }
 
     const transId = paymentSessionData.comgateData.transId as string;
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "authorizePayment", "transId: ", transId)
+      console.log("ComgateMedusa: " + "authorizePayment", "transId: ", transId);
     }
 
     const transactionStatus = await this.getComgateTransactionStatus(transId);
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "authorizePayment", "response: ", transactionStatus)
+      console.log(
+        "ComgateMedusa: " + "authorizePayment",
+        "response: ",
+        transactionStatus
+      );
     }
-
 
     const sessionData = {
       status: transactionStatus.status,
@@ -142,12 +146,16 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
           status: transactionStatus.comgateStatus,
           redirect: paymentSessionData.comgateData.redirect,
           error: transactionStatus.comgateError,
-        }
-      }
-    }
+        },
+      },
+    };
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "authorizePayment", "sessionData: ", sessionData)
+      console.log(
+        "ComgateMedusa: " + "authorizePayment",
+        "sessionData: ",
+        sessionData
+      );
     }
 
     return sessionData;
@@ -156,17 +164,17 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
   async cancelPayment(
     paymentSessionData: ComgateSessionData
   ): Promise<
-    PaymentProcessorError | ComgatePaymentProcessorSessionResponse["session_data"]
+    | PaymentProcessorError
+    | ComgatePaymentProcessorSessionResponse["session_data"]
   > {
-
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "cancelPayment", "start")
+      console.log("ComgateMedusa: " + "cancelPayment", "start");
     }
 
     const transId = paymentSessionData.comgateData.transId as string;
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "cancelPayment", "transId: ", transId)
+      console.log("ComgateMedusa: " + "cancelPayment", "transId: ", transId);
     }
 
     try {
@@ -175,7 +183,12 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
       });
 
       if (this.options_.debug) {
-        console.log("ComgateMedusa: " + "cancelPayment", "response: ", code, message)
+        console.log(
+          "ComgateMedusa: " + "cancelPayment",
+          "response: ",
+          code,
+          message
+        );
       }
 
       if (code === 0) {
@@ -186,7 +199,7 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
             status: "CANCELLED",
             redirect: paymentSessionData.comgateData.redirect,
             error: null,
-          }
+          },
         };
       } else if (code === 1400) {
         const error: PaymentProcessorError = {
@@ -209,10 +222,11 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
   async capturePayment(
     paymentSessionData: ComgateSessionData
   ): Promise<
-    PaymentProcessorError | ComgatePaymentProcessorSessionResponse["session_data"]
+    | PaymentProcessorError
+    | ComgatePaymentProcessorSessionResponse["session_data"]
   > {
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "capturePayment", "start")
+      console.log("ComgateMedusa: " + "capturePayment", "start");
     }
 
     return paymentSessionData;
@@ -221,10 +235,11 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
   async deletePayment(
     paymentSessionData: ComgateSessionData
   ): Promise<
-    PaymentProcessorError | ComgatePaymentProcessorSessionResponse["session_data"]
+    | PaymentProcessorError
+    | ComgatePaymentProcessorSessionResponse["session_data"]
   > {
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "deletePayment", "start")
+      console.log("ComgateMedusa: " + "deletePayment", "start");
     }
     return await this.cancelPayment(paymentSessionData);
   }
@@ -233,17 +248,22 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
     paymentSessionData: ComgateSessionData,
     refundAmount: number
   ): Promise<
-    PaymentProcessorError | ComgatePaymentProcessorSessionResponse["session_data"]
+    | PaymentProcessorError
+    | ComgatePaymentProcessorSessionResponse["session_data"]
   > {
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "refundPayment", "start")
+      console.log("ComgateMedusa: " + "refundPayment", "start");
     }
 
     const transId = paymentSessionData.comgateData.transId as string;
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "refundPayment", "transId: ", transId)
-      console.log("ComgateMedusa: " + "refundPayment", "amount: ", String(refundAmount))
+      console.log("ComgateMedusa: " + "refundPayment", "transId: ", transId);
+      console.log(
+        "ComgateMedusa: " + "refundPayment",
+        "amount: ",
+        String(refundAmount)
+      );
     }
 
     try {
@@ -253,7 +273,11 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
       });
 
       if (this.options_.debug) {
-        console.log("ComgateMedusa: " + "refundPayment", "response: ", refundPayment)
+        console.log(
+          "ComgateMedusa: " + "refundPayment",
+          "response: ",
+          refundPayment
+        );
       }
 
       if (refundPayment.code !== 0) {
@@ -271,7 +295,7 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
           status: paymentSessionData.comgateData.status,
           redirect: paymentSessionData.comgateData.redirect,
           error: null,
-        }
+        },
       };
     } catch (error: any) {
       return this.buildError("Failed to refund payment", error);
@@ -281,23 +305,28 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
   async retrievePayment(
     paymentSessionData: ComgateSessionData
   ): Promise<
-    PaymentProcessorError | ComgatePaymentProcessorSessionResponse["session_data"]
+    | PaymentProcessorError
+    | ComgatePaymentProcessorSessionResponse["session_data"]
   > {
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "retrievePayment", "start")
+      console.log("ComgateMedusa: " + "retrievePayment", "start");
     }
 
     const transId = paymentSessionData.comgateData.transId as string;
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "retrievePayment", "transId: ", transId)
+      console.log("ComgateMedusa: " + "retrievePayment", "transId: ", transId);
     }
 
     try {
       const transactionStatus = await this.getComgateTransactionStatus(transId);
 
       if (this.options_.debug) {
-        console.log("ComgateMedusa: " + "retrievePayment", "response: ", transactionStatus)
+        console.log(
+          "ComgateMedusa: " + "retrievePayment",
+          "response: ",
+          transactionStatus
+        );
       }
 
       return {
@@ -307,7 +336,7 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
           status: transactionStatus.comgateStatus,
           redirect: paymentSessionData.comgateData.redirect,
           error: transactionStatus.comgateError,
-        }
+        },
       };
     } catch (error: any) {
       return this.buildError("Failed to retrieve payment", error);
@@ -316,22 +345,27 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
 
   async updatePayment(
     context: PaymentProcessorContext
-  ): Promise<PaymentProcessorError | ComgatePaymentProcessorSessionResponse | void> {
-
+  ): Promise<
+    PaymentProcessorError | ComgatePaymentProcessorSessionResponse | void
+  > {
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "updatePayment", "start")
+      console.log("ComgateMedusa: " + "updatePayment", "start");
     }
 
-    //const { amount, customer } = context;
+    // const { amount, customer } = context;
     const paymentSessionData = context.paymentSessionData as ComgateSessionData;
-    //const transId = paymentSessionData.comgateData.transId as string;
+    // const transId = paymentSessionData.comgateData.transId as string;
 
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "updatePayment", "paymentSessionData: ", paymentSessionData)
+      console.log(
+        "ComgateMedusa: " + "updatePayment",
+        "paymentSessionData: ",
+        paymentSessionData
+      );
     }
 
     return {
-      session_data: paymentSessionData
+      session_data: paymentSessionData,
     };
   }
 
@@ -339,11 +373,12 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
     sessionId: string,
     data: ComgateSessionData
   ): Promise<
-    ComgatePaymentProcessorSessionResponse["session_data"] | PaymentProcessorError
+    | ComgatePaymentProcessorSessionResponse["session_data"]
+    | PaymentProcessorError
   > {
     if (this.options_.debug) {
-      console.log("ComgateMedusa: " + "updatePaymentData", "start")
-      console.log("ComgateMedusa: " + "updatePaymentData", "data: ", data)
+      console.log("ComgateMedusa: " + "updatePaymentData", "start");
+      console.log("ComgateMedusa: " + "updatePaymentData", "data: ", data);
     }
     return data;
   }
@@ -364,11 +399,10 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
   }
 
   private async getComgateTransactionStatus(transId: string): Promise<{
-    status: PaymentSessionStatus,
-    comgateStatus: StatusResponseStatus | "ERROR",
-    comgateError: PaymentProcessorError | null
-  }>
-  {
+    status: PaymentSessionStatus;
+    comgateStatus: StatusResponseStatus | "ERROR";
+    comgateError: PaymentProcessorError | null;
+  }> {
     let status: PaymentSessionStatus;
     let comgateStatus: StatusResponseStatus | "ERROR";
     let comgateError: PaymentProcessorError | null = null;
@@ -384,23 +418,26 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
         const error: PaymentProcessorError = {
           error: paymentStatus.message,
           code: String(paymentStatus.code),
-          detail: paymentStatus.message
+          detail: paymentStatus.message,
         };
-        comgateError = this.buildError("Error Comgate API payment status Response", error);
+        comgateError = this.buildError(
+          "Error Comgate API payment status Response",
+          error
+        );
       } else {
         switch (paymentStatus.status.toUpperCase()) {
           case "PENDING":
             status = PaymentSessionStatus.AUTHORIZED;
-          break;
+            break;
           case "PAID":
             status = PaymentSessionStatus.AUTHORIZED;
-          break;
+            break;
           case "AUTHORIZED":
             status = PaymentSessionStatus.AUTHORIZED;
-          break;
+            break;
           case "CANCELLED":
             status = PaymentSessionStatus.CANCELED;
-          break;
+            break;
           default:
             status = PaymentSessionStatus.PENDING;
         }
@@ -409,13 +446,16 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
     } catch (error) {
       status = PaymentSessionStatus.ERROR;
       comgateStatus = "ERROR";
-      comgateError = this.buildError("Error in calling Comgate API payment status", error);
+      comgateError = this.buildError(
+        "Error in calling Comgate API payment status",
+        error
+      );
     }
 
     return {
       status: status,
       comgateStatus: comgateStatus,
-      comgateError: comgateError
+      comgateError: comgateError,
     };
   }
 }

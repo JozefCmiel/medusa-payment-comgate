@@ -1,5 +1,9 @@
-import {PaymentProcessorError, PaymentProcessorSessionResponse, PaymentSessionStatus} from "@medusajs/medusa";
-import {StatusResponseStatus} from "comgate-node/dist/types/endpoints/status";
+import {
+  PaymentProcessorError,
+  PaymentProcessorSessionResponse,
+  PaymentSessionStatus,
+} from "@medusajs/medusa";
+import { StatusResponseStatus } from "comgate-node/dist/types/endpoints/status";
 
 export interface ComgatePaymentOptions {
   merchant: number;
@@ -9,22 +13,27 @@ export interface ComgatePaymentOptions {
 }
 
 export const PaymentProviderKeys = {
+  COMGATE_CARD: "comgate_card",
+  COMGATE_BANK: "comgate_bank",
   COMGATE: "comgate",
 };
 
-export type ComgatePaymentProcessorSessionResponse = Omit<PaymentProcessorSessionResponse, 'session_data'> & {
+export type ComgatePaymentProcessorSessionResponse = Omit<
+  PaymentProcessorSessionResponse,
+  "session_data"
+> & {
   session_data: ComgateSessionData;
 };
 
 export type ComgateSessionData = {
-  status: PaymentSessionStatus,
+  status: PaymentSessionStatus;
   comgateData: {
-    transId: string | null,
-    status: "INITIATED" | "CREATED" | "ERROR" | StatusResponseStatus,
-    redirect: string | null,
-    error: PaymentProcessorError | null,
-  }
-}
+    transId: string | null;
+    status: "INITIATED" | "CREATED" | "ERROR" | StatusResponseStatus;
+    redirect: string | null;
+    error: PaymentProcessorError | null;
+  };
+};
 
 export type ComgateStatusRequest = {
   merchant: string; // identifikátor e-shopu v systému Comgate
@@ -36,7 +45,7 @@ export type ComgateStatusRequest = {
   email: string; // kontaktní email na Plátce
   transId: string; // unikátní alfanumerický identifikátor (kód) transakce (transactionId)
   secret: string; // heslo pro komunikaci na pozadí
-  status: 'PAID' | 'CANCELLED' | 'AUTHORIZED'; // aktuální stav transakce
+  status: "PAID" | "CANCELLED" | "AUTHORIZED"; // aktuální stav transakce
   payerId?: string; // identifikátor Plátce v systému e-shopu
   payerName?: string; // předání jména účtu patřící Plátci
   payerAcc?: string; // předání čísla účtu Plátce
