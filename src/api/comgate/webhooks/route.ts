@@ -12,7 +12,6 @@ import { MedusaError } from "medusa-core-utils";
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
-    console.log("Comgate Webhook received", req.body);
     const container = req.scope;
     const requestBody = req.body as ComgateStatusRequest;
 
@@ -126,7 +125,7 @@ async function capturePayment(cartId, transactionManager, container) {
   const order = await orderService
     .withTransaction(transactionManager)
     .retrieveByCartId(cartId)
-    .catch(() => {});
+    .catch(() => undefined);
   if (order?.payment_status !== "captured") {
     await orderService
       .withTransaction(transactionManager)

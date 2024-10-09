@@ -8,7 +8,6 @@ import {
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
-    console.log("Creating transaction", req.body);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const cartId = req.body.cart_id;
