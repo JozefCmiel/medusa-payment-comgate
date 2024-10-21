@@ -33,7 +33,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         ? (cart.billing_address.country_code?.toUpperCase() as CreateCountry)
         : (cart.shipping_address?.country_code?.toUpperCase() as CreateCountry),
       price: cart.total,
-      curr: "EUR",
+      curr: cart.region.currency_code.toUpperCase() as CreateCurr,
       label: "Order from eshop",
       refId: cart.id.replace("cart_", ""),
       method: method,
